@@ -1,4 +1,5 @@
 const express = require("express");
+const session = require('express-session')
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
@@ -30,6 +31,8 @@ app.use(express.static(path.join(__dirname, "public"), { maxage: "7d" }));
 // view engine
 app.set('view engine', 'ejs');
 app.use(cors());
+app.set('trust proxy', 1); // trust first proxy
+app.use(session({ secret: 'SessionSecret_LOL', resave: false, saveUninitialized: true, cookie: { secure: true } }));
 app.use(bodyParser.json({ limit: "500mb" }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "500mb" }));
 app.use(cookieParser());
