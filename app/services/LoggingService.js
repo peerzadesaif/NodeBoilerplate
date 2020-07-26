@@ -7,6 +7,7 @@ import logType from "@/app/enum/logType";
 class LoggingService {
 	constructor() {
 		this.DEBUG_LOGGING_ON = true;
+		// You can use winston ro pino to store a logs using a transports for better visibility
 		this.logger = winston.createLogger({
 			levels: winston.config.npm.levels,
 			level: logType.DEBUG,
