@@ -62,6 +62,7 @@ process.on("uncaughtException", exitHandler(1, 'Unexcepted Error'))
 process.on("SIGTERM", exitHandler(0, 'SIGTERM'))
 process.on("SIGINT", exitHandler(0, 'USIGINT'))
 
+// require("@/root/cluster").default(server, app)
 server.listen(app.get("port") || 8001, "127.0.0.1");
 
 const onError = (error) => {
@@ -82,8 +83,8 @@ const onError = (error) => {
 };
 const onListening = () => {
     let addr = server.address();
-    let bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
-    console.log('Server Listening on My custom port ' + bind);
+    let bind = typeof addr === 'string' ? 'pipe: ' + addr : 'port: ' + addr.port;
+    console.log(`Server Listening on ${bind} process id: ${process.pid}`);
 };
 server.on('error', onError);
 server.on('listening', onListening);
