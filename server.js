@@ -50,9 +50,9 @@ require('@/routes').default(app);
 
 process.on("unhandledRejection", code => LoggingService.consoleLog(`SERVER_BACKEND_ERROR", "Uncaught error in ${String(code)}`));
 
-process.on('beforeExit', code => LoggingService.consoleLog(`SERVER_BACKEND_ERROR", "Before server exit error in ${String(code)}`));
+process.on('beforeExit', code => LoggingService.consoleLog(`SERVER_PROCESS_ERROR", "Process will exit with code ${String(code)}`), setTimeout(() => process.exit(code), 100));
 
-process.on('exit', (code) => LoggingService.consoleLog(`SERVER_BACKEND_ERROR", "On server exit error in ${String(code)}`));
+process.on('exit', code => LoggingService.consoleLog(`SERVER_PROCESS_ERROR", "Process exited with code ${String(code)}`));
 
 server.listen(app.get("port") || 8001, "127.0.0.1");
 
