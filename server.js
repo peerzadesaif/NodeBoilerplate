@@ -32,14 +32,13 @@ app.use(express.static(path.join(__dirname, "public"), { maxage: "7d" }));
 app.set('view engine', 'ejs');
 app.use(cors());
 app.set('trust proxy', 1); // trust first proxy
-app.use(session({ secret: 'SessionSecret_LOL', resave: false, saveUninitialized: true, cookie: { secure: true } }));
+app.use(session({ secret: 'Secret_LOL', resave: false, saveUninitialized: true, cookie: { secure: true, maxAge: 60000 } }));
 app.use(bodyParser.json({ limit: "500mb" }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "500mb" }));
-app.use(cookieParser());
+app.use(cookieParser('Secret_LOL'));
 morgan.token("process-ip", function (req) { return req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.ip || "" });
 
 app.use(morgan(':process-ip - :date - ":method :url HTTP/:http-version" - :status - :res[content-length] - :response-time ms', { stream: { write: function (msg) { return LoggingService.consoleLog("MORGAN", msg) } } }));
-
 
 app.use(fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, safeFileNames: true, abortOnLimit: true }));
 
@@ -90,7 +89,6 @@ const onError = (error) => {
 const onListening = () => {
     let addr = server.address();
     let bind = typeof addr === 'string' ? 'pipe: ' + addr : 'port: ' + addr.port;
-    console.log('process.argv', process.argv)
     console.log(`Server Listening on ${bind} process id: ${process.pid}`);
 };
 server.on('error', onError);
