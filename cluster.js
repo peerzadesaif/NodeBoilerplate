@@ -1,8 +1,6 @@
 const cluster = require('cluster');
 const numCPUs = require('os').cpus();
-
 import LoggingService from "@/app/services/LoggingService";
-
 
 const startCluster = (server, app) => {
     if (cluster.isMaster) {

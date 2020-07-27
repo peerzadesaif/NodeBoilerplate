@@ -43,7 +43,7 @@ app.use(morgan(':process-ip - :date - ":method :url HTTP/:http-version" - :statu
 app.use(fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, safeFileNames: true, abortOnLimit: true }));
 
 app.get("/", function (req, res) {
-    throw new ErrorService(404, 'Nothing')
+    throw new ErrorService(202, 'Successfully')
 });
 app.use(ResponseService.handleError)
 app.use(ResponseService.handleError)
@@ -58,7 +58,7 @@ const exitHandler = terminate(server, { coredump: false, timeout: 500 });
  * SIGTERM: A process monitor will send a SIGTERM signal to successfully terminate a process
  * SIGINT: It's emitted when the process is interrupted (^C)
  */
-process.on('beforeExit', code => { LoggingService.consoleLog("SERVER_PROCESS_ERROR", `Process will exit with code ${String(code)}`); setTimeout(() => process.exit(code), 100) });
+process.on('beforeExit', code => { LoggingService.consoleLog("SERVER_PROCESS_ERROR", `Process will exit with code ${String(code)}`), setTimeout(() => process.exit(code), 100) });
 process.on("unhandledRejection", exitHandler(1, 'Unhandled Promise'))
 process.on("uncaughtException", exitHandler(1, 'Unexcepted Error'))
 process.on("SIGTERM", exitHandler(0, 'SIGTERM'))
