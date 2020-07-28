@@ -42,4 +42,4 @@ Features
 Notes
 ---------------
 - Please start redis server on your system
-- Reference link: https://redis.io/topics/quickstart
+- Reference link for redis : https://redis.io/topics/quickstart
