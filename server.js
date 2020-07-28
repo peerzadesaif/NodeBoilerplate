@@ -48,11 +48,30 @@ app.use(ResponseService.handleError)
 // ENABLE OR INITIATE ROUTES
 require('@/routes').default(app);
 
-process.on("unhandledRejection", code => LoggingService.consoleLog(`SERVER_BACKEND_ERROR", "Uncaught error in ${String(code)}`));
+process.on('beforeExit', code => { LoggingService.consoleLog("SERVER_PROCESS_ERROR", `Process will exit with code ${String(code)}`); setTimeout(() => process.exit(code), 100) });
 
-process.on('beforeExit', code => LoggingService.consoleLog(`SERVER_PROCESS_ERROR", "Process will exit with code ${String(code)}`), setTimeout(() => process.exit(code), 100));
+process.on('exit', code => { LoggingService.consoleLog("SERVER_PROCESS_ERROR", `Process exited with code ${String(code)}`) });
 
-process.on('exit', code => LoggingService.consoleLog(`SERVER_PROCESS_ERROR", "Process exited with code ${String(code)}`));
+/**
+ * unhandledRejection: Emitted when a Promises rejected and no handler is attached to the promise
+ */
+process.on("unhandledRejection", (reason, promise) => { LoggingService.consoleLog("SERVER_BACKEND_ERROR", `Unhandled rejection at promise: ${promise} reason: ${String(reason)}`); process.exit(1) });
+/**
+ * uncaughtException: Emitted when a Javascript error isn't properly handled
+ */
+process.on("uncaughtException", (error) => { LoggingService.consoleLog("SERVER_BACKEND_ERROR", `Uncaught Exception: ${String(error.message)}`); process.exit(1) });
+
+/**
+ * SIGTERM: A process monitor will send a SIGTERM signal to successfully terminate a process
+ */
+process.on('SIGTERM', signal => { LoggingService.consoleLog("SERVER_PROCESS_SIGTERM", `SIGTERM: Process ${process.pid} received a SIGTERM signal`); process.exit(0) });
+
+/**
+ * SIGINT: It's emitted when the process is interrupted (^C)
+ */
+process.on('SIGINT', signal => { LoggingService.consoleLog("SERVER_PROCESS_SIGINT", `SIGINT: Process ${process.pid} has been interrupted`); process.exit(0) });
+
+
 
 server.listen(app.get("port") || 8001, "127.0.0.1");
 
