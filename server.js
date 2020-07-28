@@ -7,6 +7,8 @@ const cors = require("cors");
 const morgan = require("morgan");
 const http = require("http");
 const path = require("path");
+const redis = require('redis');
+const redisStore = require('connect-redis')(session);
 // Powering realtime experiences
 // const pusher = require("pusher");
 
@@ -32,7 +34,14 @@ app.use(express.static(path.join(__dirname, "public"), { maxage: "7d" }));
 app.set('view engine', 'ejs');
 app.use(cors());
 app.set('trust proxy', 1); // trust first proxy
-app.use(session({ secret: 'Secret_LOL', resave: false, saveUninitialized: true, cookie: { secure: true, maxAge: 60000 } }));
+
+app.use(session({
+    secret: 'Secret_LOL',
+    // create new redis store.
+    store: new redisStore({ host: constant.config.host, port: 6379, client: redis.createClient(), ttl: 260 }),
+    saveUninitialized: true,
+    resave: false
+}));
 app.use(bodyParser.json({ limit: "500mb" }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "500mb" }));
 app.use(cookieParser('Secret_LOL'));
@@ -68,7 +77,7 @@ process.on("SIGINT", exitHandler(0, 'USIGINT'))
 /**
  * ENABLE IF YOU NEED TO RUN SERVER WITH CLUSTER
  */
-!constant.config.runClusterServer ? server.listen(app.get("port") || 8001, "127.0.0.1") : require("@/root/cluster").default(server, app);
+!constant.config.runClusterServer ? server.listen(app.get("port") || 8001, constant.config.host) : require("@/root/cluster").default(server, app);
 
 const onError = (error) => {
     if (error.syscall !== 'listen') throw error;
