@@ -62,8 +62,10 @@ process.on("uncaughtException", exitHandler(1, 'Unexcepted Error'))
 process.on("SIGTERM", exitHandler(0, 'SIGTERM'))
 process.on("SIGINT", exitHandler(0, 'USIGINT'))
 
-// require("@/root/cluster").default(server, app)
-server.listen(app.get("port") || 8001, "127.0.0.1");
+/**
+ * ENABLE IF YOU NEED TO RUN SERVER WITH CLUSTER
+ */
+constant.config.runClusterServer ? require("@/root/cluster").default(server, app) : server.listen(app.get("port") || 8001, "127.0.0.1");
 
 const onError = (error) => {
     if (error.syscall !== 'listen') throw error;
