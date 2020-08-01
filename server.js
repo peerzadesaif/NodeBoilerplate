@@ -62,10 +62,11 @@ process.on("uncaughtException", exitHandler(1, 'Unexcepted Error'))
 process.on("SIGTERM", exitHandler(0, 'SIGTERM'))
 process.on("SIGINT", exitHandler(0, 'USIGINT'))
 
+// YOUR SERVER IS LISTENING HERE
 /**
  * ENABLE IF YOU NEED TO RUN SERVER WITH CLUSTER
  */
-constant.config.runClusterServer ? require("@/root/cluster").default(server, app) : server.listen(app.get("port") || 8001, "127.0.0.1");
+!constant.config.runClusterServer ? server.listen(app.get("port") || 8001, "127.0.0.1") : require("@/root/cluster").default(server, app);
 
 const onError = (error) => {
     if (error.syscall !== 'listen') throw error;
@@ -86,6 +87,7 @@ const onError = (error) => {
 const onListening = () => {
     let addr = server.address();
     let bind = typeof addr === 'string' ? 'pipe: ' + addr : 'port: ' + addr.port;
+    console.log('process.argv', process.argv)
     console.log(`Server Listening on ${bind} process id: ${process.pid}`);
 };
 server.on('error', onError);
