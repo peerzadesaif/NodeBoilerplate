@@ -27,7 +27,7 @@ class ResponseService {
 
     handleError = (error, req, res, next) => {
         const { statusCode = 405, message = null, apiVersion = 'No Version', data = null } = error;
-        let _obj = { statusCode, apiVersion, data, ...responseHelper(statusCode) };
+        let _obj = { statusCode, apiVersion, data, device: req.app.get('device'), ...responseHelper(statusCode) };
         message ? (_obj['_message'] = 'Custom Message', _obj['message'] = message) : undefined
         return res.status(statusCode).json(_obj);
     };
