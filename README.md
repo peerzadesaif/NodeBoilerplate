@@ -33,6 +33,9 @@ Features
 - MVC Project Structure
 - Winston logger service to handle logs based on conditions
 - Error service to handle all type of error
+- Process error handled with required possibilities
 - Security Service to generate JWT, verify JWT, decode JWT, encrypt token, decrypt token, and etc
 - Response Service to handle all types of responses and status code using the same.
+- Created cluster module to run the server with clustering
+- Added redis and redis store to manage your express sessions
 
