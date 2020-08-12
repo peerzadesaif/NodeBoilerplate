@@ -9,6 +9,9 @@ const http = require("http");
 const path = require("path");
 const redis = require('redis');
 const redisStore = require('connect-redis')(session);
+const storeClient = redis.createClient({ host: constant.config.host, port: 6379, ttl: 260, prefix: 'local:Session' })
+
+const device = require('express-device');
 // Powering realtime experiences
 // const pusher = require("pusher");
 
@@ -34,17 +37,31 @@ app.use(express.static(path.join(__dirname, "public"), { maxage: "7d" }));
 app.set('view engine', 'ejs');
 app.use(cors());
 app.set('trust proxy', 1); // trust first proxy
+storeClient.on("end", (error) => {
+    console.log('error :>> ', error);
+});
+storeClient.on("error", error => {
+    console.error('Error :>> ', `Redis connection to ${error.address}:${error.port} failed - connect ${error.code} ${error.address}:${error.port}`);
+    app.use(session({ secret: 'Secret_LOL', resave: false, saveUninitialized: true, cookie: { secure: true, maxAge: 60000 } }));
+    storeClient.end(true);
+});
 
-app.use(session({
-    secret: 'Secret_LOL',
-    // create new redis store.
-    store: new redisStore({ host: constant.config.host, port: 6379, client: redis.createClient(), ttl: 260 }),
-    saveUninitialized: true,
-    resave: false
-}));
+
+storeClient.on("ready", async () => {
+    app.use(session({
+        secret: 'Secret_LOL',
+        // create new redis store.
+        store: new redisStore({ client: storeClient }),
+        saveUninitialized: true,
+        resave: false,
+        cookie: { secure: true, maxAge: 60000 }
+    }));
+})
+
 app.use(bodyParser.json({ limit: "500mb" }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "500mb" }));
 app.use(cookieParser('Secret_LOL'));
+app.use(device.capture());
 morgan.token("process-ip", function (req) { return req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.ip || "" });
 
 app.use(morgan(':process-ip - :date - ":method :url HTTP/:http-version" - :status - :res[content-length] - :response-time ms', { stream: { write: function (msg) { return LoggingService.consoleLog("MORGAN", msg) } } }));
@@ -52,6 +69,7 @@ app.use(morgan(':process-ip - :date - ":method :url HTTP/:http-version" - :statu
 app.use(fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, safeFileNames: true, abortOnLimit: true }));
 
 app.get("/", function (req, res) {
+    console.log('req.device', req.device.type)
     throw new ErrorService(202, 'Successfully')
 });
 app.use(ResponseService.handleError)
@@ -67,7 +85,7 @@ const exitHandler = terminate(server, { coredump: false, timeout: 500 });
  * SIGTERM: A process monitor will send a SIGTERM signal to successfully terminate a process
  * SIGINT: It's emitted when the process is interrupted (^C)
  */
-process.on('beforeExit', code => { LoggingService.consoleLog("SERVER_PROCESS_ERROR", `Process will exit with code ${String(code)}`), setTimeout(() => process.exit(code), 100) });
+process.on('beforeExit', code => { LoggingService.consoleLog("SERVER_PROCESS_ERROR", `Process will exit with code ${String(code)}`); setTimeout(() => process.exit(code), 100) });
 process.on("unhandledRejection", exitHandler(1, 'Unhandled Promise'))
 process.on("uncaughtException", exitHandler(1, 'Unexcepted Error'))
 process.on("SIGTERM", exitHandler(0, 'SIGTERM'))
