@@ -39,3 +39,7 @@ Features
 - Created cluster module to run the server with clustering
 - Added redis and redis store to manage your express sessions
 
+Notes
+---------------
+- Please start redis server on your system
+- Reference link: https://redis.io/topics/quickstart
