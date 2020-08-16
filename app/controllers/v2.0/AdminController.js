@@ -5,7 +5,7 @@ import LoggingService from "@/app/services/LoggingService";
 import * as constant from "@/app/helpers/constant";
 
 module.exports.Testing = (req, res) => {
-  let apiVersion = req["meta"] ? req.meta["version"] || null : null;
+  let apiVersion = req.app.get('version')
   LoggingService.consoleLog(`TESTING", "Here we are on ${apiVersion}`, {
     error: "error",
   });
