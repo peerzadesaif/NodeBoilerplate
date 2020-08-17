@@ -7,11 +7,11 @@ const cors = require("cors");
 const morgan = require("morgan");
 const http = require("http");
 const path = require("path");
+const device = require('express-device');
 const redis = require('redis');
 const redisStore = require('connect-redis')(session);
 const storeClient = redis.createClient({ host: constant.config.host, port: 6379, ttl: 260, prefix: 'local:Session' })
 
-const device = require('express-device');
 // Powering realtime experiences
 // const pusher = require("pusher");
 
@@ -26,6 +26,7 @@ import LoggingService from "@/app/services/LoggingService";
 import ResponseService from "@/app/services/ResponseService";
 import ErrorService from "@/app/services/ErrorService";
 import terminate from "@/root/terminate";
+import deviceUserAgentMiddleware from "@/middleware/deviceUserAgentMiddleware";
 
 const app = express();
 const server = http.createServer(app);
@@ -61,22 +62,31 @@ storeClient.on("ready", async () => {
 app.use(bodyParser.json({ limit: "500mb" }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "500mb" }));
 app.use(cookieParser('Secret_LOL'));
-app.use(device.capture());
+app.use(device.capture({ parseUserAgent: true }));
 morgan.token("process-ip", function (req) { return req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || req.headers["x-real-ip"] || req.ip || "" });
 
 app.use(morgan(':process-ip - :date - ":method :url HTTP/:http-version" - :status - :res[content-length] - :response-time ms', { stream: { write: function (msg) { return LoggingService.consoleLog("MORGAN", msg) } } }));
 
 app.use(fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, safeFileNames: true, abortOnLimit: true }));
 
-app.get("/", function (req, res) {
-    console.log('req.device', req.device.type)
-    throw new ErrorService(202, 'Successfully')
+app.use(function (req, res, next) {
+    req.app.set('title', 'working')
+    console.log('object :>> ');
+    next()
 });
-app.use(ResponseService.handleError)
-app.use(ResponseService.handleError)
+
+console.log('deviceUserAgentMiddleware :>> ', deviceUserAgentMiddleware);
+app.use(deviceUserAgentMiddleware.setRequestUserDevice)
 
 // ENABLE OR INITIATE ROUTES
 require('@/routes').default(app);
+app.get("/", function (req, res) {
+    // console.log('req.device', req.device)
+    // console.log('app.get() :>> ', req.app.get('title'));
+    throw new ErrorService(202, 'Successfully')
+});
+
+app.use(ResponseService.handleError)
 
 const exitHandler = terminate(server, { coredump: false, timeout: 500 });
 /**

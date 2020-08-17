@@ -5,7 +5,8 @@ import LoggingService from "@/app/services/LoggingService";
 import * as constant from "@/app/helpers/constant";
 
 module.exports.Testing = (req, res) => {
-  let apiVersion = req.app.get('version')
+  let apiVersion = req.app.get('version');
+  let device = req.app.get('device');
   LoggingService.consoleLog(`TESTING", "Here we are on ${apiVersion}`, { error: "error" });
   // Get List From the Queries and pass it to the response service
   let data = [{ data: "data" }];
