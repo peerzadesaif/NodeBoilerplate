@@ -1,7 +1,7 @@
 {
   "name": "nodeboilerplate",
   "version": "1.0.0",
-  "description": "Node Js Boilerplate By Saif",
+  "description": "Node Js Boilerplate By Saif Peerzade",
   "main": "server.js",
   "scripts": {
     "start": "babel-node ./server.js --presets es2015,stage-2",
